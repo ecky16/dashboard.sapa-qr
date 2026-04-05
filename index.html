@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Absensi - Telkom Akses</title>
+    <title>Monitoring Dashboard SAPA-QR - Telkom Akses</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -13,92 +13,163 @@
 </head>
 <body class="bg-slate-100 text-slate-900">
 
-    <nav class="bg-red-600 text-white p-4 shadow-xl sticky top-0 z-50">
-        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-white p-2 rounded-lg text-red-600 shadow-inner">
-                    <i class="fas fa-users-viewfinder text-xl"></i>
-                </div>
-                <h1 class="text-xl font-extrabold tracking-tighter uppercase">Monitoring Dashboard SAPA-QR</h1>
-            </div>
-            <div class="flex items-center gap-3 bg-red-700 px-4 py-2 rounded-xl border border-red-400">
-                <i class="far fa-calendar-alt text-red-200"></i>
-                <input type="date" id="filter-date" onchange="bypassDate = false; processData()" class="bg-transparent outline-none cursor-pointer text-white font-bold text-sm">
-                <button onclick="showAllDates()" class="bg-white text-red-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase shadow-sm hover:bg-red-50 transition-colors">Semua Waktu</button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container mx-auto p-4 md:p-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8 items-end">
-            <div class="lg:col-span-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Service Area</label>
-                <select id="filter-area" onchange="processData()" class="w-full border-2 border-white p-3 rounded-2xl bg-white shadow-sm outline-none focus:ring-4 focus:ring-red-100 transition-all font-bold text-slate-700">
-                    <option value="ALL">SEMUA AREA</option>
-                </select>
-            </div>
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center transition-opacity duration-500">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-11/12 max-w-md border-t-8 border-red-600 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 text-slate-100 text-9xl opacity-20"><i class="fas fa-shield-alt"></i></div>
             
-            <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center">
-                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter">Total Masuk</p>
-                    <p id="stat-masuk" class="text-4xl font-black text-blue-600">0</p>
+            <div class="relative z-10">
+                <div class="flex justify-center mb-6 text-red-600 text-5xl">
+                    <i class="fas fa-user-shield"></i>
                 </div>
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center">
-                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter text-red-400">Total Telat</p>
-                    <p id="stat-telat" class="text-4xl font-black text-red-500">0</p>
-                </div>
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center col-span-2 md:col-span-1">
-                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter text-green-400">Sudah Pulang</p>
-                    <p id="stat-pulang" class="text-4xl font-black text-green-600">0</p>
+                <h2 class="text-2xl font-black text-center text-slate-800 uppercase tracking-tight mb-1">Secure Portal</h2>
+                <p class="text-center text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-8">Monitoring Dashboard SAPA-QR</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Username</label>
+                        <input type="text" id="username" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all font-bold text-slate-700" placeholder="Masukkan Username">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Password</label>
+                        <input type="password" id="password" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all font-bold text-slate-700" placeholder="••••••••" onkeypress="if(event.key === 'Enter') doLogin()">
+                    </div>
+                    
+                    <p id="login-error" class="text-red-500 text-[10px] font-black uppercase text-center hidden mt-2"><i class="fas fa-exclamation-circle"></i> Username / Password Salah!</p>
+
+                    <button onclick="doLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest py-3 rounded-xl shadow-lg shadow-red-500/30 transition-all transform hover:scale-[1.02] mt-4">
+                        Masuk Dashboard <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
-                <div class="p-6 bg-white border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="font-black text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
-                        <span class="w-2 h-6 bg-red-600 rounded-full"></span> 📋 Log Absensi
-                    </h2>
-                    <span id="label-date" class="text-[10px] font-black bg-slate-100 text-slate-500 px-4 py-2 rounded-xl uppercase tracking-tighter"></span>
+    <div id="dashboard-content" class="hidden">
+        <nav class="bg-red-600 text-white p-4 shadow-xl sticky top-0 z-50">
+            <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white p-2 rounded-lg text-red-600 shadow-inner">
+                        <i class="fas fa-users-viewfinder text-xl"></i>
+                    </div>
+                    <h1 class="text-xl font-extrabold tracking-tighter uppercase">Monitoring Dashboard SAPA-QR</h1>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-[10px] uppercase bg-slate-50 text-slate-400 border-b font-black tracking-widest">
-                                <th class="p-6">Nama Teknisi</th>
-                                <th class="p-6 text-center">Service Area</th>
-                                <th class="p-6">Waktu Masuk</th>
-                                <th class="p-6">Status</th>
-                                <th class="p-6">Jam Kerja</th>
-                            </tr>
-                        </thead>
-                        <tbody id="main-table" class="divide-y divide-slate-50 text-sm">
-                            <tr><td colspan="5" class="p-20 text-center text-slate-300 font-bold uppercase tracking-widest">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="flex items-center gap-3 bg-red-700 px-4 py-2 rounded-xl border border-red-400">
+                    <i class="far fa-calendar-alt text-red-200"></i>
+                    <input type="date" id="filter-date" onchange="bypassDate = false; processData()" class="bg-transparent outline-none cursor-pointer text-white font-bold text-sm">
+                    <button onclick="showAllDates()" class="bg-white text-red-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase shadow-sm hover:bg-red-50 transition-colors">Semua Waktu</button>
+                    <button onclick="doLogout()" class="bg-red-900 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase hover:bg-slate-900 transition-colors ml-2" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container mx-auto p-4 md:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8 items-end">
+                <div class="lg:col-span-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Service Area</label>
+                    <select id="filter-area" onchange="processData()" class="w-full border-2 border-white p-3 rounded-2xl bg-white shadow-sm outline-none focus:ring-4 focus:ring-red-100 transition-all font-bold text-slate-700">
+                        <option value="ALL">SEMUA AREA</option>
+                    </select>
+                </div>
+                
+                <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter">Total Masuk</p>
+                        <p id="stat-masuk" class="text-4xl font-black text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter text-red-400">Total Telat</p>
+                        <p id="stat-telat" class="text-4xl font-black text-red-500">0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center col-span-2 md:col-span-1">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-tighter text-green-400">Sudah Pulang</p>
+                        <p id="stat-pulang" class="text-4xl font-black text-green-600">0</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200 text-center">
-                    <h3 class="font-black text-green-700 text-xs uppercase tracking-widest mb-6 flex items-center gap-2 justify-center">
-                        <i class="fas fa-trophy text-xl text-yellow-400"></i> Top 5 Terawal
-                    </h3>
-                    <div id="rank-early" class="space-y-4 text-left"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+                    <div class="p-6 bg-white border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="font-black text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-6 bg-red-600 rounded-full"></span> 📋 Log Absensi
+                        </h2>
+                        <span id="label-date" class="text-[10px] font-black bg-slate-100 text-slate-500 px-4 py-2 rounded-xl uppercase tracking-tighter"></span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[10px] uppercase bg-slate-50 text-slate-400 border-b font-black tracking-widest">
+                                    <th class="p-6">Nama Teknisi</th>
+                                    <th class="p-6 text-center">Service Area</th>
+                                    <th class="p-6">Waktu Masuk</th>
+                                    <th class="p-6">Status</th>
+                                    <th class="p-6">Jam Kerja</th>
+                                </tr>
+                            </thead>
+                            <tbody id="main-table" class="divide-y divide-slate-50 text-sm">
+                                <tr><td colspan="5" class="p-20 text-center text-slate-300 font-bold uppercase tracking-widest">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200 text-center">
-                    <h3 class="font-black text-red-700 text-xs uppercase tracking-widest mb-6 flex items-center gap-2 justify-center">
-                        <i class="fas fa-fire text-xl text-orange-500"></i> Top 5 Sering Telat
-                    </h3>
-                    <div id="rank-late" class="space-y-4 text-left"></div>
+                <div class="space-y-6">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200 text-center">
+                        <h3 class="font-black text-green-700 text-xs uppercase tracking-widest mb-6 flex items-center gap-2 justify-center">
+                            <i class="fas fa-trophy text-xl text-yellow-400"></i> Top 5 Terawal
+                        </h3>
+                        <div id="rank-early" class="space-y-4 text-left"></div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200 text-center">
+                        <h3 class="font-black text-red-700 text-xs uppercase tracking-widest mb-6 flex items-center gap-2 justify-center">
+                            <i class="fas fa-fire text-xl text-orange-500"></i> Top 5 Sering Telat
+                        </h3>
+                        <div id="rank-late" class="space-y-4 text-left"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <script>
+        // ======= LOGIC LOGIN =======
+        const correctUser = "admin";
+        const correctPass = "anjay";
+
+        // Cek pas buka web, apakah udah login sebelumnya?
+        window.onload = function() {
+            if(sessionStorage.getItem("authTelkomAkses") === "true") {
+                bukaDashboard();
+            }
+        };
+
+        function doLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const err = document.getElementById('login-error');
+
+            if(u === correctUser && p === correctPass) {
+                sessionStorage.setItem("authTelkomAkses", "true"); // Simpan sesi
+                err.classList.add('hidden');
+                bukaDashboard();
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem("authTelkomAkses"); // Hapus sesi
+            location.reload(); // Refresh balik ke login
+        }
+
+        function bukaDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+            init(); // Mulai tarik data dari GAS setelah login sukses
+        }
+
+        // ======= LOGIC DASHBOARD (Sama seperti sebelumnya) =======
         const API_URL = "https://script.google.com/macros/s/AKfycbwRgMKOgIY5SAR0AcUnhRbZDT5irDWpPYcP9WXgmUqVZmDkXgzV-vAopeFHZw_bIFYy8w/exec";
         let rawData = [];
         let bypassDate = false;
@@ -138,19 +209,14 @@
             processData();
         }
 
-        // FUNGSI SAKTI BARU: Merakit Tanggal Langsung dari 3 Kolom Spreadsheet
         function getExactDate(i) {
-            // Jika ada data TAHUN, BULAN, TANGGAL, rangkai jadi YYYY-MM-DD
             if (i.tahun && i.bulan && i.tanggal) {
-                // Hapus kalau ada koma/spasi tak sengaja
                 const y = String(i.tahun).replace(/\D/g, '');
                 const m = String(i.bulan).replace(/\D/g, '').padStart(2, '0');
                 const d = String(i.tanggal).replace(/\D/g, '').padStart(2, '0');
-                
                 if (y.length === 4) return `${y}-${m}-${d}`;
             }
 
-            // Fallback (Cadangan) kalau tidak ada
             const fallbackVal = i.jam_absen || i.waktu_masuk;
             if (!fallbackVal) return null;
             
@@ -165,8 +231,8 @@
 
         function processData() {
             const area = document.getElementById('filter-area').value;
-            const tglInput = document.getElementById('filter-date').value; // YYYY-MM-DD
-            const blnInput = tglInput ? tglInput.substring(0, 7) : ""; // YYYY-MM
+            const tglInput = document.getElementById('filter-date').value; 
+            const blnInput = tglInput ? tglInput.substring(0, 7) : ""; 
             
             if (bypassDate) {
                 document.getElementById('label-date').innerText = "SEMUA TANGGAL";
@@ -174,7 +240,6 @@
                 document.getElementById('label-date').innerText = tglInput;
             }
 
-            // FILTER
             const filteredData = rawData.filter(i => {
                 const areaVal = String(i.service_area || i.area || "").trim().toUpperCase();
                 const matchArea = area === "ALL" || areaVal === area;
@@ -188,7 +253,6 @@
                 return matchArea && matchDate;
             });
 
-            // FILTER BULANAN (Untuk Top 5 Ranking)
             const monthlyData = rawData.filter(i => {
                 const areaVal = String(i.service_area || i.area || "").trim().toUpperCase();
                 const matchArea = area === "ALL" || areaVal === area;
@@ -214,7 +278,6 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="p-20 text-center text-slate-400 font-bold uppercase tracking-widest">TIDAK ADA DATA ABSENSI TANGGAL INI.</td></tr>`;
             } else {
                 tbody.innerHTML = daily.map(i => {
-                    // Ambil format jam untuk ditampilkan
                     let displayJam = '-';
                     if (i.jam_absen || i.waktu_masuk) {
                         const d = new Date(i.jam_absen || i.waktu_masuk);
@@ -239,7 +302,6 @@
                 }).join('');
             }
 
-            // RANKING
             const stats = {};
             const firstAbsen = {};
             
@@ -274,9 +336,6 @@
                 <span class="text-[10px] bg-${color}-600 text-white px-2 py-1 rounded-lg font-black">${u.count}x</span>
             </div>`;
         }
-
-        init();
-        setInterval(init, 60000);
     </script>
 </body>
 </html>
